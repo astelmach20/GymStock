@@ -25,10 +25,12 @@ class StockEnv(Env):
 
     self.action_space = Discrete(3)
 
-    stock_prices = Box(low=np.min(self.df)[0], high = np.max(self.df)[0], shape=(self.window_size, ), dtype=np.float32)
-    account_amount = Box(low = 0, high=np.inf, shape=(1, ), dtype=np.float32)
-    
-    self.observation_space = Tuple((stock_prices, account_amount))
+    spaces = {
+    'stock_prices' : Box(low=np.min(self.df)[0], high = np.max(self.df)[0], shape=(self.window_size, ), dtype=np.float32),
+    'account_amount' : Box(low = 0, high=np.inf, shape=(1, ), dtype=np.float32)
+    }
+
+    self.observation_space = gym.spaces.Dict(spaces)
 
     self.starting_index = start_index
     self.index = start_index # used for getting the prices
@@ -36,7 +38,7 @@ class StockEnv(Env):
 
     prices = self._get_prices()
     self.shares = 0
-    self.state = (prices, 0)
+    self.state = {"stock_prices" : prices, 'account_amount' : 0}
     self.prev_money = 0
     # a state is a tuple of the current prices we are looking at in the window along with the money we have
 
@@ -80,18 +82,18 @@ class StockEnv(Env):
     else:
       raise Exception("Invalid action")
 
-    self.state = (self._get_prices(), self.shares * self._get_today_price())
+    self.state = {"stock_prices" : self._get_prices(), 'account_amount' : self.shares * self._get_today_price()}
 
     # calculate reward - how much money we made each timestep/trade
-    reward = self.state[1] - self.prev_money
-    self.prev_money = self.state[1]
+    reward = self.state['account_amount'] - self.prev_money
+    self.prev_money = self.state['account_amount']
 
     # calculate done
     done = self.current_time == self.end_index
 
     # calculate info
     info = dict()
-    info['Current Money'] = self.state[1]
+    info['Current Money'] = self.state['account_amount']
     info['Shares'] = self.shares
     info['Reward'] = reward
     info['Current Timestep'] = self.current_time
@@ -115,7 +117,7 @@ class StockEnv(Env):
 
     prices = self._get_prices()
     self.shares = 0
-    self.state = (prices, 0)
+    self.state = {"stock_prices" : prices, 'account_amount' : 0}
     self.prev_money = 0
 
     self.money = []
