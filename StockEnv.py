@@ -29,7 +29,8 @@ class StockEnv(Env):
 
   def __init__(self, df, investment=1000, start_index=0, end_index=None, window_size = 30):
 
-    self.df = df
+    df.index = pd.to_datetime(df.index)
+    self.df = df.sort_index()
     self.window_size = window_size
     self.end_index = len(self.df.index) if end_index == None else end_index # where we end the data
 
@@ -70,7 +71,7 @@ class StockEnv(Env):
 
   # gets the prices
   def _get_prices(self):
-    # if we are at the end of the window
+    # if we are near the end of the window, assume price stays constant
     if self.window_size + self.index > len(self.df.index):
       values = self.df.iloc[self.index:, :]['Close']
       return values.reindex(range(self.window_size), fill_value=np.mean(values)).tolist()
@@ -80,7 +81,7 @@ class StockEnv(Env):
     return values
 
   def get_total_money(self):
-    return self.shares * self._get_today_price() + self.money_left_to_invest
+    return round(self.shares * self._get_today_price() + self.money_left_to_invest, 4)
 
   def _get_today_price(self):
       return self.df['Close'][self.current_time-1]
