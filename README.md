@@ -11,7 +11,7 @@
     - 2 = buy 25% of your money to invest in shares
     - 3 = buy 50% of your money to invest
     - 4 = buy 75% of your money to invest
-    - 5 = buy all of your money to invest
+    - 5 = buy 100% of your money to invest
     - 6 = sell 1 share
     - 7 = sell 25% of your shares
     - 8 = sell 50% of your shares
